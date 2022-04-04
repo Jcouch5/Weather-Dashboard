@@ -45,9 +45,10 @@ function populateFiveDay(cords){
         .then(data => {
 
             for (let i = 1; i < data.daily.length-2; i++) {
+                var wrapperEl = $('<div>');
                 var cardEl = $('<div>');
                 var cardBodyEl = $('<div>')
-                var cityDate = $('<h1>');
+                var cityDate = $('<h5>');
                 var icon = $('<img>')
                 var temp = $('<p>');
                 var humidity = $('<p>');
@@ -72,8 +73,9 @@ function populateFiveDay(cords){
                 cardBodyEl.append(windSpeed);
                 cardBodyEl.addClass('card-body');
                 cardEl.append(cardBodyEl);
-                cardEl.addClass('col-2 card border border-dark')
-                fiveDayEl.append(cardEl);
+                wrapperEl.addClass('col-2 card border border-dark m-3')
+                wrapperEl.append(cardEl);
+                fiveDayEl.append(wrapperEl);
             }
             
     })
@@ -84,13 +86,14 @@ function getUVI(cords){
     .then(response => response.json())
     .then(data => {
         var uviText = $('<p>');
-        var uviNum = $('<p>');
+        var uviNum = $('<span>');
         var uv =data.daily[0].uvi;
         uviText.text('UV Index: ');
         dashboardEl.append(uviText);
 
         uviNum.text(uv);
-        dashboardEl.append(uviNum);
+        uviNum.addClass('d-inline');
+        uviText.append(uviNum);
         if(uv > 10){
             uviNum.addClass('bg-pink');
         } else if (uv >= 8) {
@@ -127,9 +130,9 @@ function getCity(cityName){
 
 searchBtnEl.on('click', function(e){
      e.preventDefault();
-     while (dashboardEl.firstChild) {
-        dashboardEl.removeChild(dashboardEl.firstChild)
-    }
+    //  while (dashboardEl.firstChild) {
+    //     dashboardEl.removeChild(dashboardEl.firstChild)
+    // }
      var cityName = cityInputEl.value.trim();
      getCity(cityName);
      cityInputEl.value = '';
