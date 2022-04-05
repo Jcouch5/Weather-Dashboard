@@ -3,6 +3,7 @@ var apiKey = 'd3ea098c07dab4f64c000489e765860c';
 var searchBtnEl = $('#searchBtn');
 var dashboardEl = $('#dashboard');
 var fiveDayEl = $('#fiveDay');
+var searchHistory = JSON.parse(localStorage.getItem('city')) || [];
 // populates the current weather by pulling the data from openweather api 
 function populateCurrentWeather(cords) {
     
@@ -10,6 +11,7 @@ function populateCurrentWeather(cords) {
     .then(response => response.json())
         .then(data => {
 
+            dashboardEl[0].innerHTML = '';
             var cityName = data.name;
             var cityDate = $('<h1>');
             var icon = $('<img>')
@@ -43,7 +45,7 @@ function populateFiveDay(cords){
     fetch('https://api.openweathermap.org/data/2.5/onecall?lat='+cords.lat+'&lon='+cords.lon+'&exclude=hourly,minutely,current&units=imperial&appid=' + apiKey)
     .then(response => response.json())
         .then(data => {
-
+            fiveDayEl[0].innerHTML = "";
             for (let i = 1; i < data.daily.length-2; i++) {
                 var wrapperEl = $('<div>');
                 var cardEl = $('<div>');
@@ -81,6 +83,7 @@ function populateFiveDay(cords){
     })
 
 }
+// gets the UV index and displays it
 function getUVI(cords){
     fetch('https://api.openweathermap.org/data/2.5/onecall?lat='+cords.lat+'&lon='+cords.lon+'&exclude=hourly,minutely,current&appid=' + apiKey)
     .then(response => response.json())
@@ -108,7 +111,7 @@ function getUVI(cords){
 
     })
 }
-
+// gets the searched city's latitude and longitude and passes it to the five day and current weather functions
 function getCity(cityName){
 
 
@@ -127,15 +130,51 @@ function getCity(cityName){
 
       .catch(error => new Error(error));
 }
+// commits previous searches into local storage
+function saveHistory(cityName) {
 
+    if (!searchHistory.includes(cityName)) {
+        searchHistory.push(
+            {
+                'city': cityName
+            }
+        )
+        localStorage.setItem('city', JSON.stringify(searchHistory));
+    }
+    
+}
+//  loads the search history on webpage load
+function loadHistory(){
+    if (searchHistory.length > 0){
+
+        for (var i = 0; i < searchHistory.length; i++) {
+            var cityButtonEl = $('<button>');
+            var historyEl = $('#history');
+            var city = searchHistory[i].city
+            cityButtonEl.text(city);
+            cityButtonEl.attr('id', 'historyBtn');
+            cityButtonEl.addClass('text-white bg-secondary mt-2 col-12');
+            historyEl.append(cityButtonEl);
+        }
+    }
+}
+
+// gets weather info for a city when it is entered into the search bar
 searchBtnEl.on('click', function(e){
      e.preventDefault();
-    //  while (dashboardEl.firstChild) {
-    //     dashboardEl.removeChild(dashboardEl.firstChild)
-    // }
+
      var cityName = cityInputEl.value.trim();
      getCity(cityName);
+     saveHistory(cityName);
      cityInputEl.value = '';
+    
+});
+// 
+$('#history').on('click', function(e){
 
+    var cityName = e.target.innerHTML;
+    getCity(cityName);
 
 });
+
+loadHistory();
